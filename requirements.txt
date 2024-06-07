@@ -1,0 +1,9 @@
+certifi==2024.2.2
+charset-normalizer==3.3.2
+idna==3.7
+iiif-prezi3 @ git+https://github.com/iiif-prezi/iiif-prezi3.git@aeed7b663d7e53674320c1b313085b16271b8c49
+pillow==10.3.0
+pydantic==1.10.15
+requests==2.31.0
+typing_extensions==4.11.0
+urllib3==2.2.1
