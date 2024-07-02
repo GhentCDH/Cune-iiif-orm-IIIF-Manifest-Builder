@@ -12,9 +12,7 @@ def fix_svg_polygon_selector(selector: dict, rescale_factor: float = 1):
         if matches := re.findall(regex, selector['value'], re.MULTILINE):
             coordinates = [ float(number)*rescale_factor for number in re.split(',| ', matches[0])]
             coordinates = [coordinates[i:i+2] for i in range(0,len(coordinates),2)]
-            print(coordinates)
             points = ' '.join([f"{point[0]},{point[1]}" for point in coordinates])
-            print(points)
             selector['value'] = f'<svg><path d="M{points}z" /></svg>'
 
     return selector
