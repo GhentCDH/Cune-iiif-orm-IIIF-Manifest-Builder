@@ -10,7 +10,7 @@ class IfffUriHelper():
     MANIFEST_SCHEME = "{base_url}/manifests/{manifest_id}"
     CANVAS_SCHEME = "{base_url}/manifests/{manifest_id}/canvas/{canvas_id}"
     SERVICE_SCHEME = "{base_url}/services/{service_id}/{id}"
-    MANIFEST_DATA_SCHEME = "{base_url}/manifests/{manifest_id}/{data_id}"
+    MANIFEST_DATA_SCHEME = "{base_url}/manifests/{manifest_id}/data/{data_id}"
 
     def __init__(self, base_url, base_path):
         self.base_url = base_url.rstrip('/')
@@ -85,26 +85,6 @@ class IfffUriHelper():
         manifest_path = self.id_to_path(manifest_id)
         data_path = self.id_to_path(data_id)
         return os.path.join(self.base_path, manifest_path, "data", data_path)
-
-    # def createContentID(self, _manifest_id, _file_id):
-    #     return f"{_manifest_id}:{_file_id}"
-
-    # def getManifestPath(self, _manifest_id):
-    #     return f"{self.base_path}/{self.IDtoPath(_manifest_id)}"
-
-    # def getCollectionPath(self, _collection_id):
-    #     return f"{self.base_path}/{self.IDtoPath(_collection_id)}"
-
-    # def getIDFromRequestUri(self, _request_uri):
-    #     base_path = parse.urlparse(self.base_url).path
-    #     regexp = f"{base_path}/({self.collection_prefix}|{self.MANIFEST_PREFIX})/([.a-z0-9_-]+(:([.a-z0-9_-]+)+)*)"
-    #     regexp = f";^{regexp}$;i"
-    #     matches = re.match(regexp, _request_uri)
-    #     if not matches:
-    #         raise Exception('Invalid id')
-    #     _id = matches.group(2)
-    #     _id = re.sub('#:[.]+:?#', ':', _id)
-    #     return _id
 
     def id_from_file(self, file_path: str) -> str:
         filename = os.path.basename(file_path)
