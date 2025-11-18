@@ -1,2 +1,9 @@
 venv
-
+test
+log
+lib
+__pycache__/
+_tmp
+*.pyc
+*.pyo
+backup/snap.skype.skype.20241107161723
