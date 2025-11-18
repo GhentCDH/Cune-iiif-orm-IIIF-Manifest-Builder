@@ -295,7 +295,7 @@ Each annotation has a body of type **TextualBody** with:
 
 ### Links to external data
 
-The `seeAlso` property is used to link to the ATF transliteration. The (unofficial) MIME type `text/x-atf` is used to provide extra info to the viewer.
+The `seeAlso` property is used to link to the data exports. 
 
 #### Example
 
