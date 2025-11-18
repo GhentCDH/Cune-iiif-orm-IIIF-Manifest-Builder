@@ -291,7 +291,7 @@ for manifest_path in manifests:
         {
             "file": f"{tablet_id}-transliteration-atf.txt",
             "label": "Transliteration (ATF)",
-            "type": "text/plain",
+            "type": "text/x-atf",
         },
         {
             "file": f"{tablet_id}-translation.txt",
