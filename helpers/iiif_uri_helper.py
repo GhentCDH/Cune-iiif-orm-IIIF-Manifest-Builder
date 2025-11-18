@@ -10,6 +10,7 @@ class IfffUriHelper():
     MANIFEST_SCHEME = "{base_url}/manifests/{manifest_id}"
     CANVAS_SCHEME = "{base_url}/manifests/{manifest_id}/canvas/{canvas_id}"
     SERVICE_SCHEME = "{base_url}/services/{service_id}/{id}"
+    MANIFEST_DATA_SCHEME = "{base_url}/manifests/{manifest_id}/{data_id}"
 
     def __init__(self, base_url, base_path):
         self.base_url = base_url.rstrip('/')
@@ -35,9 +36,55 @@ class IfffUriHelper():
     
     def create_canvas_annotation_uri(self, manifest_id: str, canvas_id: str, annotation_id: str):
         return f"{self.create_canvas_uri(manifest_id, canvas_id)}/annotation/{annotation_id}"
+    
+    def create_manifest_annotation_page_uri(self, manifest_id: str, annotation_page_id: str):
+        return f"{self.create_manifest_uri(manifest_id)}/annotation-page/{annotation_page_id}"
 
+    def create_manifest_annotation_uri(self, manifest_id: str, annotation_id: str):
+        return f"{self.create_manifest_uri(manifest_id)}/annotation/{annotation_id}"
+    
+    def create_manifest_data_uri(self, manifest_id: str, data_id: str):
+        return self.MANIFEST_DATA_SCHEME.format(base_url=self.base_url, manifest_id=manifest_id, data_id=data_id)
+    
     def create_service_uri(self, object_id, service_id):
         return self.SERVICE_SCHEME.format(base_url=self.base_url, service_id=service_id, id=object_id)
+
+    # Path methods
+    def create_manifest_path(self, manifest_id: str):
+        return os.path.join(self.base_path, self.id_to_path(manifest_id))
+
+    def create_collection_path(self, collection_id: str):
+        return os.path.join(self.base_path, self.id_to_path(collection_id))
+
+    # def create_canvas_path(self, manifest_id: str, canvas_id: str):
+    #     manifest_path = self.id_to_path(manifest_id)
+    #     canvas_path = self.id_to_path(canvas_id)
+    #     return os.path.join(self.base_path, manifest_path, "canvas", canvas_path)
+
+    # def create_canvas_annotation_page_path(self, manifest_id: str, canvas_id: str, annotation_page_id: str):
+    #     canvas_path = self.create_canvas_path(manifest_id, canvas_id)
+    #     annotation_page_path = self.id_to_path(annotation_page_id)
+    #     return os.path.join(canvas_path, "annotation-page", annotation_page_path)
+    
+    # def create_canvas_annotation_path(self, manifest_id: str, canvas_id: str, annotation_id: str):
+    #     canvas_path = self.create_canvas_path(manifest_id, canvas_id)
+    #     annotation_path = self.id_to_path(annotation_id)
+    #     return os.path.join(canvas_path, "annotation", annotation_path)
+    
+    def create_manifest_annotation_page_path(self, manifest_id: str, annotation_page_id: str):
+        manifest_path = self.create_manifest_path(manifest_id)
+        annotation_page_path = self.id_to_path(annotation_page_id)
+        return os.path.join(manifest_path, "annotation-page", annotation_page_path)
+
+    def create_manifest_annotation_path(self, manifest_id: str, annotation_id: str):
+        manifest_path = self.create_manifest_path(manifest_id)
+        annotation_path = self.id_to_path(annotation_id)
+        return os.path.join(manifest_path, "annotation", annotation_path)
+    
+    def create_manifest_data_path(self, manifest_id: str, data_id: str):
+        manifest_path = self.id_to_path(manifest_id)
+        data_path = self.id_to_path(data_id)
+        return os.path.join(self.base_path, manifest_path, "data", data_path)
 
     # def createContentID(self, _manifest_id, _file_id):
     #     return f"{_manifest_id}:{_file_id}"
@@ -74,5 +121,5 @@ class IfffUriHelper():
 
     def id_to_path(self, id) -> str:
         id = id.replace(':', '/')
-        id = re.sub('#/[.]+/?#', '/', id)
+        # id = re.sub('#/[.]+/?#', '/', id)
         return id.strip('/')
