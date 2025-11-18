@@ -4,7 +4,7 @@ from helpers.iiif_uri_helper import IfffUriHelper
 from helpers.resources import ImageDetails
 from iiif_prezi3 import ResourceItem, Canvas, Annotation, AnnotationPage, Choice
 
-def create_resource_item(image: ImageDetails, uri_helper: IfffUriHelper, _config: dict) -> ResourceItem:
+def create_image_resource_item(image: ImageDetails, uri_helper: IfffUriHelper, _config: dict) -> ResourceItem:
     # image id
     image_id = _config["image_id_prefix"] + uri_helper.id_from_file(image["file_path"])
     
@@ -68,7 +68,8 @@ def create_canvas_with_choice(
                     )
                 ]
             )                
-        ]
+        ],
+        thumbnail = [ resource_items[0] ]
     )
     
     return canvas
