@@ -1,45 +1,82 @@
 import json
-import os
-from helpers.svg import fix_svg_polygon_selector
-from iiif_prezi3 import AnnotationPage
+from helpers.cuneur import SignData
+import helpers.svg as svg
 
-def patch_annotation(annotation: dict, canvas_uri: str, annotation_uri: str, scale_factor: float = 1.0):
-    # patch target source
-    annotation['target']['source'] = canvas_uri
-    annotation['target']['type'] = "SpecificResource"
-    # patch target svg selector (polygon -> path)
-    annotation['target']['selector'] = fix_svg_polygon_selector(annotation['target']['selector'], scale_factor)
+from iiif_prezi3 import AnnotationPage, Annotation, Model
 
-    # patch id/motivation/context
-    annotation['id'] = annotation_uri
-    annotation['motivation'] = "describing"
-    del annotation['@context']
-    return annotation
 
-def convert_annotator_annotations(
-    annotations_source_path: str,
-    annotations_dest_path: str,
-    annotation_page_uri: str,
-    annotation_target_uri: str,
-    scale_factor: float,
-    annotation_uri_generator: callable) -> None:
-    
-    # create referenced annotation page
+
+def save_iiif_model(model: Model, dest_path: str):
+    with open(dest_path, 'w') as dest_file:
+        json.dump(model.jsonld_dict(), dest_file, indent=4)
+
+
+def create_annotation_page(id: str, label: str, items: list[Annotation]) -> AnnotationPage:
     annotation_page = AnnotationPage(
-        # id=uri_helper.create_canvas_annotation_page_uri(manifest_id, canvas_id, "sign-annotations"),
-        id=annotation_page_uri,
-        items=[]
+        id=id,
+        items=items,
+        label={"en": [label]},
     )
-    with open(annotations_source_path) as source_file:
-        annotations = json.load(source_file)
-        for annotation_id, annotation in annotations.items():
-            annotation = patch_annotation(
-                annotation, 
-                annotation_target_uri, 
-                annotation_uri_generator(annotation['id']),
-                scale_factor)
-            annotation_page.items.append(annotation)
-            # todo: sort annotaitons by line/word/char
-    # output annotations
-    with open(annotations_dest_path, 'w') as dest_file:
-        json.dump(annotation_page.jsonld_dict(), dest_file, indent=4)
+
+    return annotation_page
+
+def create_text_annotation(id: str, text: str, format: str, purpose: str, motivation: str, target: str) -> Annotation:
+    body = [
+        {
+            "type": "TextualBody",
+            "purpose": purpose,
+            "value": text,
+            "format": format,
+        },            
+    ]
+
+    annotation = Annotation(
+        id = id,
+        motivation = motivation,
+        body = body,
+        target = [target]
+    )
+
+    return annotation    
+    
+def create_sign_annotation(sign: SignData, annotation_uri: str, target_uri: str) -> Annotation:
+
+    body = []
+
+    signPosition = {}
+    signPosition['side'] = sign.get('side')
+    signPosition["lineIndex"] = sign.get("line_index")
+    signPosition["wordIndex"] = sign.get("word_index")
+    signPosition["charIndex"] = sign.get("char_index")
+
+    if sign.get("transliteration"):
+        body.append(
+            {
+                "type": "TextualBody",
+                "purpose": "transliterating",
+                "value": sign["transliteration"],
+                "format": "text/plain"
+            },            
+        )
+
+    body.append({
+        "type": "SignPosition",
+        **signPosition
+    })
+
+    annotation = Annotation(
+        id = annotation_uri,
+        motivation = "describing",
+        body = body,
+        target = [
+            {
+                "type": "SpecificResource",
+                "source": target_uri,
+                "selector": {
+                    "type": "SvgSelector",
+                    "value": svg.points_to_path(sign["points"])
+                }
+            }
+        ]
+    )
+    return annotation    
