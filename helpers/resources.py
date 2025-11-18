@@ -10,18 +10,18 @@ class ImageDetails(TypedDict):
 
 
 # find manifest folders
-def scan_manifests(base_path: str) -> list:
-    manifests: list = []
-    
-    dirs = [os.path.join(base_path, filename) for filename in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, filename))]
-    
+def scan_manifests(base_path: str) -> list:   
+    dirs = [os.path.join(base_path, filename) for filename in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, filename)) and os.path.exists(os.path.join(base_path, filename, f"{filename}-annotator-annotations.json"))]
     return dirs
 
 # find images in manifest
 def scan_images(manifest_path: str) -> list[ImageDetails]:
     images: list = []
     
-    image_filenames = [filename for filename in os.listdir(manifest_path) if os.path.isfile(os.path.join(manifest_path, filename)) and (filename.endswith('.jp2') or filename.endswith('.ptif'))]
+    dirlist = os.listdir(manifest_path)
+    dirlist.sort()
+    
+    image_filenames = [filename for filename in dirlist if os.path.isfile(os.path.join(manifest_path, filename)) and (filename.endswith('.jp2') or filename.endswith('.ptif'))]
     for filename in image_filenames:
         # Get the full file path
         file_path = os.path.join(manifest_path, filename)
