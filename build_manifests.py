@@ -4,7 +4,7 @@ import os
 import json
 import shutil
 
-from iiif_prezi3 import Manifest, AnnotationPageRef, ResourceItem, config, Canvas, ExternalItem, Collection
+from iiif_prezi3 import Manifest, AnnotationPageRef, AnnotationBody, config, Canvas, LinkedResource, Collection, Annotation, ManifestRef
 
 import helpers.annotations as annotations
 import helpers.cuneur as cuneur
@@ -12,7 +12,7 @@ import helpers.svg as svg
 from helpers.atf_indexer import AtfIndexer
 
 from helpers.iiif_resources import create_canvas_with_choice, create_image_resource_item
-from helpers.iiif_uri_helper import IfffUriHelper
+from helpers.iiif_uri import IfffUri
 from helpers.nodegoat_metadata import nodegoat_to_iiif_metadata
 from helpers.resources import scan_images, scan_manifests
 from config import _config
@@ -23,7 +23,7 @@ config.configs['helpers.auto_fields.AutoLang'].auto_lang = "en"
 base_path = _config['base_path']
 
 # init url/path helper
-uri_helper = IfffUriHelper(_config['base_url'], _config['base_path'])
+iiif_uri = IfffUri(_config['base_url'], _config['base_path'])
 
 # find manifest folders
 manifests = scan_manifests(base_path)
@@ -33,7 +33,7 @@ manifests = scan_manifests(base_path)
 atf_reader = AtfIndexer()
 
 # create collection manifest
-collection_manifest = Collection(id=uri_helper.create_collection_uri(_config['collection_id']), label="Cune-iiif-orm SDE",items=[], type="Collection")
+collection_manifest = Collection(id=iiif_uri.create_collection_uri(_config['collection_id']), label={"en": ["Cune-iiif-orm SDE"]},items=[], type="Collection") # type: ignore
 
 # loop over manifests
 for manifest_path in manifests:
@@ -135,38 +135,40 @@ for manifest_path in manifests:
                     else:
                         print(f"Warning: no char info for {annotation['side']} {annotation['line_index']} {annotation['char_index']}")
 
-        except Exception as e:
+        except Exception:
             print(f"- Could not parse {transliteration_path}")
             continue
 
     # create resource images
-    image_resource_items: list[ResourceItem] = [create_image_resource_item(image, uri_helper, _config) for image in images]
+    image_resource_items: list[AnnotationBody] = [create_image_resource_item(image, iiif_uri, _config) for image in images]
 
     # init manifest
-    manifest_id = _config["manifest_id_prefix"] + uri_helper.id_from_path(manifest_path + '/')
-    manifest_uri = uri_helper.create_manifest_uri(manifest_id)
+    manifest_id = _config["manifest_id_prefix"] + iiif_uri.id_from_path(manifest_path + '/')
+    manifest_uri = iiif_uri.create_manifest_uri(manifest_id)
     manifest_label = os.path.basename(manifest_path)
     print(f"Creating manifest: {manifest_id}")
    
     manifest = Manifest(
-        id=manifest_uri,
-        label=manifest_label,
+        id=manifest_uri, # type: ignore
+        label={"en": [manifest_label]}, # type: ignore
+        items=[],
         **{
             "@context": None
         }
     )
         
     # add thumbnail
-    thumbnail_id = str(image_resource_items[0].service[0].id) + "/full/200,/0/default.jpg"
-    thumbnail_resource = ResourceItem(id=thumbnail_id, type="Image", width=100, height=50, format="image/jpeg")
-    thumbnail_resource.service = image_resource_items[0].service
+    if image_resource_items[0].service:
+        thumbnail_id = str(image_resource_items[0].service[0].id) + "/full/200,/0/default.jpg" # type: ignore
+        thumbnail_resource = AnnotationBody(id=thumbnail_id, type="Image", width=100, height=50, format="image/jpeg") # type: ignore
+        thumbnail_resource.service = image_resource_items[0].service
 
-    manifest.thumbnail = [ thumbnail_resource ]
+        manifest.thumbnail = [ thumbnail_resource ] # type: ignore
 
     # add metadata
     if len(nodegoat_data):
         metadata = nodegoat_to_iiif_metadata(nodegoat_data)
-        manifest.metadata = metadata
+        manifest.metadata = metadata # type: ignore
 
     # choice? create single canvas, annotationpage, annotation with body choice target canvas, annotation contains image resource items
     canvases: list[Canvas] = []
@@ -174,74 +176,77 @@ for manifest_path in manifests:
     # add single canvas with choice
     # use manifest label as canvas label
     canvas_id = '0001'
-    canvas = create_canvas_with_choice(canvas_id, manifest.label, manifest_id, image_resource_items, uri_helper)   
+    canvas = create_canvas_with_choice(canvas_id, str(manifest.label), manifest_id, image_resource_items, iiif_uri)   
     canvases.append(canvas)
     canvas_uri = canvas.id
+    
+    # Initialize annotations list if None
+    if canvas.annotations is None:
+        canvas.annotations = []
 
     # add translation
     if translation_text:
 
         # create annotation
-        annotation_uri = uri_helper.create_manifest_annotation_uri(manifest_id, f"{tablet_id}-translation.json")
-        annotation_path = uri_helper.create_manifest_annotation_path(tablet_id, f"{tablet_id}-translation.json")
+        annotation_uri = iiif_uri.create_manifest_annotation_uri(manifest_id, f"{tablet_id}-translation.json")
+        annotation_path = iiif_uri.create_manifest_annotation_path(tablet_id, f"{tablet_id}-translation.json")
 
-        annotation = annotations.create_text_annotation(
-            **{
-                "id": annotation_uri,
-                "text": translation_text,
-                "format": "text/plain",
-                "purpose": "translating",
-                "motivation": "describing",
-                "target": canvas.id
-            }            
+        annotation = Annotation(
+            id=annotation_uri, # type: ignore
+            body=[
+                {
+                    "type": "TextualBody",
+                    "value": translation_text,
+                    "format": "text/plain",
+                    "purpose": "translating",
+                    "language": "en",
+                }
+            ],
+            motivation="describing",
+            target=[ str(canvas.id) ] # type: ignore
         )
-        annotations.save_iiif_model(annotation, annotation_path)
+
+        annotations.save_iiif_model(annotation, annotation_path) # type: ignore
 
         # create translation annotation page
-        anno_page_uri = uri_helper.create_manifest_annotation_page_uri(manifest_id, f"{tablet_id}-translations.json")
-        anno_page_path = uri_helper.create_manifest_annotation_page_path(tablet_id, f"{tablet_id}-translations.json")
+        anno_page_uri = iiif_uri.create_manifest_annotation_page_uri(manifest_id, f"{tablet_id}-translations.json")
+        anno_page_path = iiif_uri.create_manifest_annotation_page_path(tablet_id, f"{tablet_id}-translations.json")
 
         anno_page = annotations.create_annotation_page(anno_page_uri, "Translations", [annotation])       
-        annotations.save_iiif_model(anno_page, anno_page_path)
+        annotations.save_iiif_model(anno_page, anno_page_path) # type: ignore
 
         # add annotation page reference to canvas
-        anno_page_ref = AnnotationPageRef(
-            id=anno_page.id,
-            type="AnnotationPage",
-        )
+        anno_page_ref = AnnotationPageRef(__root__=str(anno_page.id)) # type: ignore
         canvas.annotations.append(anno_page_ref)
 
-    # add transliteration
-    if transliteration_text:
-
         # create annotation
-        annotation_uri = uri_helper.create_manifest_annotation_uri(manifest_id, f"{tablet_id}-transliteration.json")
-        annotation_path = uri_helper.create_manifest_annotation_path(tablet_id, f"{tablet_id}-transliteration.json")
+        annotation_uri = iiif_uri.create_manifest_annotation_uri(manifest_id, f"{tablet_id}-transliteration.json")
+        annotation_path = iiif_uri.create_manifest_annotation_path(tablet_id, f"{tablet_id}-transliteration.json")
 
-        annotation = annotations.create_text_annotation(
-            **{
-                "id": annotation_uri,
-                "text": transliteration_text,
-                "format": "text/x-atf",
-                "purpose": "transliterating",
-                "motivation": "describing",
-                "target": canvas.id
-            }            
+        annotation = Annotation(
+            id=annotation_uri, # type: ignore
+            body=[
+                {
+                    "type": "TextualBody",
+                    "value": transliteration_text,
+                    "format": "text/x-atf",
+                    "purpose": "transliterating",
+                }
+            ],
+            motivation="describing",
+            target=[ str(canvas.id) ] # type: ignore
         )
-        annotations.save_iiif_model(annotation, annotation_path)
+        annotations.save_iiif_model(annotation, annotation_path) # type: ignore
 
         # create annotation page
-        anno_page_uri = uri_helper.create_manifest_annotation_page_uri(manifest_id, f"{tablet_id}-transliterations.json")
-        anno_page_path = uri_helper.create_manifest_annotation_page_path(tablet_id, f"{tablet_id}-transliterations.json")        
+        anno_page_uri = iiif_uri.create_manifest_annotation_page_uri(manifest_id, f"{tablet_id}-transliterations.json")
+        anno_page_path = iiif_uri.create_manifest_annotation_page_path(tablet_id, f"{tablet_id}-transliterations.json")        
 
         anno_page = annotations.create_annotation_page(anno_page_uri, "Transliterations", [annotation])
-        annotations.save_iiif_model(anno_page, anno_page_path)
+        annotations.save_iiif_model(anno_page, anno_page_path) # type: ignore
 
-        # add annotation page reference to canvas
-        anno_page_ref = AnnotationPageRef(
-            id=anno_page.id,
-            type="AnnotationPage",
-        )
+        # add annotation page to canvas
+        anno_page_ref = AnnotationPageRef(__root__=str(anno_page.id)) # type: ignore
         canvas.annotations.append(anno_page_ref)
 
     # add sign annotations?
@@ -251,32 +256,29 @@ for manifest_path in manifests:
         scale_factor = max([canvas.width/_config['image_api']['max_width'], canvas.height/_config['image_api']['max_height']])
         if scale_factor != 1:
             for annotatation_index, annotation in enumerate(sign_data_list):
-                annotation['points'] = svg.rescale_points(annotation['points'], scale_factor)
+                if annotation.get('points'):
+                    annotation['points'] = svg.rescale_points(annotation['points'], scale_factor) # type: ignore
 
         # create annotations
         items = []
         for sign in sign_data_list:
-            annotation_uri = uri_helper.create_manifest_annotation_uri(manifest_id, f"{sign['id']}.json")
-            annotation_path = uri_helper.create_manifest_annotation_path(tablet_id, f"{sign['id']}.json")
+            annotation_uri = iiif_uri.create_manifest_annotation_uri(manifest_id, f"{sign['id']}.json")
+            annotation_path = iiif_uri.create_manifest_annotation_path(tablet_id, f"{sign['id']}.json")
 
-            annotation = annotations.create_sign_annotation(sign, annotation_uri, canvas.id)
-            annotations.save_iiif_model(annotation, annotation_path)
+            annotation = annotations.create_sign_annotation(sign, annotation_uri, str(canvas.id))
+            annotations.save_iiif_model(annotation, annotation_path) # type: ignore
 
             items.append(annotation)
 
         # create annotation page
-        anno_page_uri = uri_helper.create_manifest_annotation_page_uri(manifest_id, f"{tablet_id}-signs.json")
-        anno_page_path = uri_helper.create_manifest_annotation_page_path(tablet_id, f"{tablet_id}-signs.json")
+        anno_page_uri = iiif_uri.create_manifest_annotation_page_uri(manifest_id, f"{tablet_id}-signs.json")
+        anno_page_path = iiif_uri.create_manifest_annotation_page_path(tablet_id, f"{tablet_id}-signs.json")
 
         anno_page = annotations.create_annotation_page(anno_page_uri, "Sign Annotations", items)
-        annotations.save_iiif_model(anno_page, anno_page_path)
+        annotations.save_iiif_model(anno_page, anno_page_path) # type: ignore
 
         # add annotation page reference to canvas
-        annotation_page_ref = AnnotationPageRef(
-            # id=uri_helper.create_canvas_annotation_page_uri(manifest_id, canvas_id, "sign-annotations"),
-            id=anno_page.id,
-            type="AnnotationPage",
-        )
+        annotation_page_ref = AnnotationPageRef(__root__=str(anno_page.id)) # type: ignore
         canvas.annotations.append(annotation_page_ref)
 
     # add word annotations?
@@ -307,40 +309,42 @@ for manifest_path in manifests:
 
     see_also = []
     for data_file in data_files:
-        data_file_uri = uri_helper.create_manifest_data_uri(manifest_id, data_file['file'])
-        data_file_path = uri_helper.create_manifest_data_path(tablet_id, data_file['file'])
+        data_file_uri = iiif_uri.create_manifest_data_uri(manifest_id, data_file['file'])
+        data_file_path = iiif_uri.create_manifest_data_path(tablet_id, data_file['file'])
 
         if os.path.exists(os.path.join(manifest_path, data_file['file'])):
             # copy file to data path
             shutil.copy2(os.path.join(manifest_path, data_file['file']), data_file_path)
 
-        item = ExternalItem(
-            id=data_file_uri,
+        item = LinkedResource(
+            id=data_file_uri, # type: ignore
             type="Dataset",
-            label=data_file['label'],
-            format=data_file['type'],
+            label={"en": [data_file['label']]}, # type: ignore
+            format=data_file['type'], # type: ignore
             profile="https://iiif.io/api/presentation/3/seeAlso.json"
         )
         see_also.append(item)
-    manifest.seeAlso = see_also
+    manifest.seeAlso = see_also # type: ignore
 
     # output manifest
-    annotations.save_iiif_model(manifest, os.path.join(manifest_path, 'manifest.json'))
+    annotations.save_iiif_model(manifest, os.path.join(manifest_path, 'manifest.json')) # type: ignore
 
     # add to collection manifest
-    manifest_ref = Manifest(
-        id=manifest.id,
+    manifest_ref = ManifestRef(
+        id=str(manifest.id), # type: ignore
         label=manifest.label,
-        **{
-            "@context": None
-        }
-        )
-    manifest_ref.thumbnail = manifest.thumbnail
-    collection_manifest.items.append(manifest_ref)
+        # **{
+        #     "@context": None
+        # }
+    )
+    manifest_ref.thumbnail = manifest.thumbnail # type: ignore
+    if collection_manifest.items is None:
+        collection_manifest.items = []
+    collection_manifest.items.append(manifest_ref) # type: ignore
 
 
 # output collection manifest
-collection_manifest_uri = uri_helper.create_collection_uri(_config['collection_id'])
+collection_manifest_uri = iiif_uri.create_collection_uri(_config['collection_id'])
 collection_manifest_path = os.path.join(base_path, 'collection.json')
-annotations.save_iiif_model(collection_manifest, collection_manifest_path)
+annotations.save_iiif_model(collection_manifest, collection_manifest_path) # type: ignore
 

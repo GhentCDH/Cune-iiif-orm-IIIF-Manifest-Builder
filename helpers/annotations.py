@@ -2,39 +2,40 @@ import json
 from helpers.cuneur import SignData
 import helpers.svg as svg
 
-from iiif_prezi3 import AnnotationPage, Annotation, Model
+from iiif_prezi3 import AnnotationPage, Annotation, Base
 
 
 
-def save_iiif_model(model: Model, dest_path: str):
+def save_iiif_model(model: Base, dest_path: str):
     with open(dest_path, 'w') as dest_file:
         json.dump(model.jsonld_dict(), dest_file, indent=4)
 
 
 def create_annotation_page(id: str, label: str, items: list[Annotation]) -> AnnotationPage:
     annotation_page = AnnotationPage(
-        id=id,
+        id=id, # type: ignore
         items=items,
-        label={"en": [label]},
+        label={"en": [label]}, # type: ignore
+        **{"@context": None}
     )
 
     return annotation_page
 
-def create_text_annotation(id: str, text: str, format: str, purpose: str, motivation: str, target: str) -> Annotation:
-    body = [
-        {
-            "type": "TextualBody",
-            "purpose": purpose,
-            "value": text,
-            "format": format,
-        },            
-    ]
+def create_text_annotation(id: str, text: str, format: str, purpose: str, motivation: str, target: str, language: str | None = None) -> Annotation:
+    textualBody = {
+        "type": "TextualBody",
+        "purpose": purpose,
+        "value": text,
+        "format": format,
+    }
+    if language:
+        textualBody["language"] = language
 
     annotation = Annotation(
         id = id,
         motivation = motivation,
-        body = body,
-        target = [target]
+        body = [ textualBody ],
+        target = [ target ]
     )
 
     return annotation    
