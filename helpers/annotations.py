@@ -20,26 +20,7 @@ def create_annotation_page(id: str, label: str, items: list[Annotation]) -> Anno
     )
 
     return annotation_page
-
-def create_text_annotation(id: str, text: str, format: str, purpose: str, motivation: str, target: str, language: str | None = None) -> Annotation:
-    textualBody = {
-        "type": "TextualBody",
-        "purpose": purpose,
-        "value": text,
-        "format": format,
-    }
-    if language:
-        textualBody["language"] = language
-
-    annotation = Annotation(
-        id = id,
-        motivation = motivation,
-        body = [ textualBody ],
-        target = [ target ]
-    )
-
-    return annotation    
-    
+   
 def create_sign_annotation(sign: SignData, annotation_uri: str, target_uri: str) -> Annotation:
 
     body = []
@@ -66,7 +47,7 @@ def create_sign_annotation(sign: SignData, annotation_uri: str, target_uri: str)
     })
 
     annotation = Annotation(
-        id = annotation_uri,
+        id = annotation_uri, # type: ignore
         motivation = "describing",
         body = body,
         target = [
