@@ -4,7 +4,7 @@ import os
 import json
 import shutil
 
-from iiif_prezi3 import Manifest, AnnotationPageRef, AnnotationBody, config, Canvas, LinkedResource, Collection, Annotation, ManifestRef
+from iiif_prezi3 import Manifest, AnnotationPageRefExtended, AnnotationBody, config, Canvas, LinkedResource, Collection, Annotation, ManifestRef
 
 import helpers.annotations as annotations
 import helpers.cuneur as cuneur
@@ -216,8 +216,11 @@ for manifest_path in manifests:
         annotations.save_iiif_model(anno_page, anno_page_path) # type: ignore
 
         # add annotation page reference to canvas
-        anno_page_ref = AnnotationPageRef(__root__=str(anno_page.id)) # type: ignore
+        anno_page_ref = AnnotationPageRefExtended(id=anno_page.id, type="AnnotationPage") # type: ignore
         canvas.annotations.append(anno_page_ref)
+
+    # add transliteration
+    if transliteration_text:
 
         # create annotation
         annotation_uri = iiif_uri.create_manifest_annotation_uri(manifest_id, f"{tablet_id}-transliteration.json")
@@ -246,7 +249,7 @@ for manifest_path in manifests:
         annotations.save_iiif_model(anno_page, anno_page_path) # type: ignore
 
         # add annotation page to canvas
-        anno_page_ref = AnnotationPageRef(__root__=str(anno_page.id)) # type: ignore
+        anno_page_ref = AnnotationPageRefExtended(id=anno_page.id, type="AnnotationPage") # type: ignore
         canvas.annotations.append(anno_page_ref)
 
     # add sign annotations?
@@ -278,8 +281,8 @@ for manifest_path in manifests:
         annotations.save_iiif_model(anno_page, anno_page_path) # type: ignore
 
         # add annotation page reference to canvas
-        annotation_page_ref = AnnotationPageRef(__root__=str(anno_page.id)) # type: ignore
-        canvas.annotations.append(annotation_page_ref)
+        anno_page_ref = AnnotationPageRefExtended(id=anno_page.id, type="AnnotationPage") # type: ignore
+        canvas.annotations.append(anno_page_ref)
 
     # add word annotations?
 
