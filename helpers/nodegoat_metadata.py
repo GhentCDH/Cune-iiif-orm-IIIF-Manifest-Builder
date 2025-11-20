@@ -18,7 +18,7 @@ def nodegoat_to_iiif_metadata(data: Dict) -> List[Dict[str, Any]]:
     # Period
     if data.get('period'):
         values = [
-            f'<a href="{item["uri"]}">{item["label"]}</a>' if item.get('uri') else item['label']
+            f'<a target="_blank" href="{item["uri"]}">{item["label"]}</a>' if item.get('uri') else item['label']
             for item in data['period']
         ]
         metadata.append({
@@ -29,7 +29,7 @@ def nodegoat_to_iiif_metadata(data: Dict) -> List[Dict[str, Any]]:
     # Languages
     if data.get('languages'):
         values = [
-            f'<a href="{item["uri"]}">{item["label"]}</a>' if item.get('uri') else item['label']
+            f'<a target="_blank" href="{item["uri"]}">{item["label"]}</a>' if item.get('uri') else item['label']
             for item in data['languages']
         ]
         metadata.append({
@@ -40,7 +40,7 @@ def nodegoat_to_iiif_metadata(data: Dict) -> List[Dict[str, Any]]:
     # Material
     if data.get('material'):
         values = [
-            f'<a href="{item["uri"]}">{item["label"]}</a>' if item.get('uri') else item['label']
+            f'<a target="_blank" href="{item["uri"]}">{item["label"]}</a>' if item.get('uri') else item['label']
             for item in data['material']
         ]
         metadata.append({
@@ -51,7 +51,7 @@ def nodegoat_to_iiif_metadata(data: Dict) -> List[Dict[str, Any]]:
     # Object Type
     if data.get('object_type'):
         values = [
-            f'<a href="{item["uri"]}">{item["label"]}</a>' if item.get('uri') else item['label']
+            f'<a target="_blank" href="{item["uri"]}">{item["label"]}</a>' if item.get('uri') else item['label']
             for item in data['object_type']
         ]
         metadata.append({
@@ -62,7 +62,7 @@ def nodegoat_to_iiif_metadata(data: Dict) -> List[Dict[str, Any]]:
     # Genres
     if data.get('genres'):
         values = [
-            f'<a href="{item["genre"]["uri"]}">{item["genre"]["label"]}</a>'
+            f'<a target="_blank" href="{item["genre"]["uri"]}">{item["genre"]["label"]}</a>'
             if item.get('genre', {}).get('uri') else item['genre']['label']
             for item in data['genres']
         ]
@@ -74,7 +74,7 @@ def nodegoat_to_iiif_metadata(data: Dict) -> List[Dict[str, Any]]:
     # External ID
     if data.get('external_id'):
         values = [
-            f'<a href="{item["uri"]}">{item["collection"]["label"]}: {item["id"]}</a>'
+            f'<a target="_blank" href="{item["uri"]}">{item["collection"]["label"]}: {item["id"]}</a>'
             if item.get('uri') else f'{item["collection"]["label"]}: {item["id"]}'
             for item in data['external_id']
         ]
@@ -86,7 +86,7 @@ def nodegoat_to_iiif_metadata(data: Dict) -> List[Dict[str, Any]]:
     # Collection
     if data.get('collection'):
         values = [
-            f'<a href="{item["collection"]["uri"]}">{item["collection"]["label"]}</a>: {item["number"]}'
+            f'<a target="_blank" href="{item["collection"]["uri"]}">{item["collection"]["label"]} : {item["number"]}</a>'
             if item.get('collection', {}).get('uri')
             else f'{item["collection"]["label"]}: {item["number"]}'
             for item in data['collection']
