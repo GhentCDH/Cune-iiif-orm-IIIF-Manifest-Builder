@@ -9,7 +9,7 @@ This project builds IIIF Presentation 3.0 manifests for the Cune-iiif-project. T
   - [Overview](#overview)
   - [Table of Contents](#table-of-contents)
   - [IIIF Manifest structure](#iiif-manifest-structure)
-    - [Tablet layers](#tablet-layers)
+    - [Tablet images](#tablet-images)
       - [Example](#example)
     - [Layer presets](#layer-presets)
       - [Expected Viewer Behavior](#expected-viewer-behavior)
@@ -25,13 +25,20 @@ This project builds IIIF Presentation 3.0 manifests for the Cune-iiif-project. T
 
 ## IIIF Manifest structure
 
-### Tablet layers
+### Tablet images
 
-The Image layers in the viewer are implemented as Multiple Choice images (see [IIIF Cookbook](https://iiif.io/api/cookbook/recipe/0033-choice/)).
+For each tablet in the Cune-iiif-orm corpus, multiple images are available. Each image set contains 11 images displaying the tablet in varying lighting and color settings:
+- 5 color variants
+- 4 shaded variants
+- 2 sketched variants
 
+To allow users to select which image to display, the images are added to the IIIF manifest using the **Choice** pattern (see [IIIF Cookbook Recipe 0033](https://iiif.io/api/cookbook/recipe/0033-choice/)).
+
+**Structure:**
 * Each manifest contains one Canvas
-* Each Canvas has an `AnnotationPage` with a single painting motivation annotation
-* The painting Annotation has a body of type `Choice` with multiple Images.
+* Each Canvas has an `AnnotationPage` containing a single annotation with `painting` motivation
+* The painting Annotation's body is of type `Choice`, containing all 11 image variants as options
+* Each image in the Choice includes a `label` property to identify the variant (e.g., "Color A", "Shaded B")
 
 #### Example
 
@@ -353,7 +360,15 @@ Each annotation has a body of type **TextualBody** with:
 
 ### Links to external data
 
-The `seeAlso` property is used to link to the data exports. 
+The `seeAlso` property provides links to machine-readable data exports in various formats. Each linked resource is defined as a `Dataset` with:
+
+* **id**: Direct URL to the downloadable file
+* **type**: "Dataset"
+* **label**: Human-readable description of the content
+* **format**: MIME type indicating the file format
+* **profile**: Reference to the IIIF Presentation API 3.0 seeAlso specification
+
+This allows programmatic access to the tablet's transliteration, translation, and metadata in their original formats, supporting both human consumption and automated processing.
 
 #### Example
 
