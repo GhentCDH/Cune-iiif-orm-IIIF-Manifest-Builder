@@ -5,12 +5,23 @@
 This project builds IIIF Presentation 3.0 manifests for the Cune-iiif-project. The manifests support multiple image layers, sign-level annotations, translations, transliterations, links to externa data etc.
 
 ## Table of Contents
-- [IIIF Manifest structure](#iiif-manifest-structure)
-  - [Tablet layers](#tablet-layers)
-  - [Sign annotations](#sign-annotations)
-  - [Translations](#translations)
-  - [Transliterations](#transliterations)
-  - [Links to external data](#links-to-external-data)
+- [Cune-iiif-orm-IIIF-Manifest-Builder](#cune-iiif-orm-iiif-manifest-builder)
+  - [Overview](#overview)
+  - [Table of Contents](#table-of-contents)
+  - [IIIF Manifest structure](#iiif-manifest-structure)
+    - [Tablet layers](#tablet-layers)
+      - [Example](#example)
+    - [Layer presets](#layer-presets)
+      - [Expected Viewer Behavior](#expected-viewer-behavior)
+      - [Important](#important)
+    - [Sign Snnotations](#sign-snnotations)
+      - [Example](#example-1)
+    - [Translations](#translations)
+      - [Example](#example-2)
+    - [Transliterations](#transliterations)
+      - [Example](#example-3)
+    - [Links to external data](#links-to-external-data)
+      - [Example](#example-4)
 
 ## IIIF Manifest structure
 
@@ -109,6 +120,53 @@ Below is an example of how a Choice of 2 images is implemented in the Cune-iiif-
 }                                    
 ```
 
+### Layer presets
+
+Layer presets are modelled as W3C Web Annotations. Each annotation has the following properties:
+
+```
+{
+  "id": "https://example.org/anno/preset1",
+  "type": "Annotation",
+  "motivation": "supplementing",
+  "body": {
+    "type": "LayerPreset",
+    "format": "application/json",
+    "label": { "en": ["High contrast preset"] },
+    "value": [
+        {
+            "id": "image_id_1",
+            "opacity": 1.0
+        },
+        {
+            "id": "image_id_2",
+            "opacity": 0.5
+        },
+        {
+            "id": "image_id_3",
+            "opacity": 0.1
+        }
+    }
+  ],
+  "target": "https://example.org/canvas1"
+}
+```
+
+For multiple presets, create separate annotations.
+
+#### Expected Viewer Behavior
+
+When a users selects a preset:
+- layers part of the preset should be enabled with the configured opacity
+- Layers not part of the preset should be hidden.
+
+#### Important
+
+This LayerPreset structure is not part of the official IIIF Presentation API specification. It represents a custom extension using the flexibility provided by the Web Annotation model.
+
+While this approach follows IIIF conventions and best practices, it will only be recognized and interpreted by viewers that have been specifically developed or configured to support this custom annotation type. Standard IIIF viewers will typically ignore annotations with unrecognized body types, ensuring backward compatibility.
+
+
 ### Sign Snnotations
 
 The annotations are modeled as W3C annotations. Each annotation has the following properties: 
@@ -150,7 +208,7 @@ The annotations are modeled as W3C annotations. Each annotation has the followin
             "body": [
                 {
                     "type": "TextualBody",
-                    "purpose": "Transliteration",
+                    "purpose": "transliterating",
                     "value": "5/6(disz)",
                     "format": "text/plain"
                 },
@@ -180,7 +238,7 @@ The annotations are modeled as W3C annotations. Each annotation has the followin
             "body": [
                 {
                     "type": "TextualBody",
-                    "purpose": "Transliteration",
+                    "purpose": "transliterating",
                     "value": "SAR",
                     "format": "text/plain"
                 },
@@ -209,7 +267,7 @@ The annotations are modeled as W3C annotations. Each annotation has the followin
 
 ### Translations
 
-The translations are modeled as IIIF Annotations following the W3C Web Annotation Data Model. 
+The translations are modeled as W3C Web Annotations. 
 
 Each annotation has a body of type **TextualBody** with:
 * `purpose`: "translating" (following W3C Web Annotation standard)
