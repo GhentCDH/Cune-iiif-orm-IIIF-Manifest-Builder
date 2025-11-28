@@ -13,11 +13,13 @@ from helpers.atf_indexer import AtfIndexer
 
 from helpers.iiif_resources import create_canvas_with_choice, create_image_resource_item
 from helpers.iiif_uri import IfffUri
-from helpers.nodegoat_metadata import nodegoat_to_iiif_metadata
-from helpers.resources import scan_images, scan_manifests
+from helpers.nodegoat import nodegoat_to_iiif_metadata
+from helpers.resources import get_folder_images, get_subfolders
 from config import _config
 
 config.configs['helpers.auto_fields.AutoLang'].auto_lang = "en"
+
+verbose = _config.get('verbose', False)
 
 # init uri
 base_path = _config['base_path']
@@ -26,7 +28,7 @@ base_path = _config['base_path']
 iiif_uri = IfffUri(_config['base_url'], _config['base_path'])
 
 # find manifest folders
-manifests = scan_manifests(base_path)
+manifests = get_subfolders(base_path)
 # manifests = ['/workspaces/data/O.0219'] 
 
 # create atf reader
@@ -40,10 +42,14 @@ for manifest_path in manifests:
 
     tablet_id = os.path.basename(manifest_path)
 
+    # init seeAlso data
+    data_files = []
+
     print(f"Processing {tablet_id} ...")
 
     # clean previous exports
-    print("- Cleaning previous exports ...")
+    if verbose:
+        print("- Cleaning previous exports ...")
     manifest_paths = [
         os.path.join(manifest_path, "manifest.json"),
         os.path.join(manifest_path, "sign-annotations.json"),
@@ -68,7 +74,8 @@ for manifest_path in manifests:
     }
 
     # create and empty folders defined in paths
-    print("- Create output directories ...")
+    if verbose:
+        print("- Create output directories ...")
     for key, path in manifest_paths.items():
         # create directory
         if not os.path.exists(path):
@@ -80,52 +87,76 @@ for manifest_path in manifests:
                 os.remove(file_path)
 
     # scan images
-    images = scan_images(manifest_path)
+    images = get_folder_images(manifest_path)
 
     # load nodegoat data
-    print("- Load nodegoat data ...")
+    if verbose:
+        print("- Load nodegoat data ...")
     nodegoat_data = {}
     nodegoat_data_path = os.path.join(manifest_path, f"{tablet_id}-data.json")
     if os.path.exists(nodegoat_data_path):
         with open(nodegoat_data_path, 'r', encoding='utf-8') as f:
             nodegoat_data = json.load(f)
-
-        # copy file to data folder
+        data_files.append({
+            "file": f"{tablet_id}-data.json",
+            "label": "Metadata",
+            "type": "application/json",
+        })
     else:
         print(f"- No nodegoat data found at {nodegoat_data_path}")
 
     # load transliteration
-    print("- Load transliteration ...")
-    transliteration_path = os.path.join(manifest_path, f"{tablet_id}-transliteration-atf.txt")
     transliteration_text = None
+    transliteration_path = os.path.join(manifest_path, f"{tablet_id}-transliteration-atf.txt")
     if os.path.exists(transliteration_path):
+        if verbose:
+            print(f"- Load transliteration ({transliteration_path}) ...")
         with open(transliteration_path, 'r', encoding='utf-8') as f:
             transliteration_text = f.read()
+        data_files.append({
+            "file": f"{tablet_id}-transliteration-atf.txt",
+            "label": "Transliteration (ATF)",
+            "type": "text/x-atf",
+        })
     else:
         print(f"- No transliteration found at {transliteration_path}")
 
-    # Load translations
-    print("- Load translation ...")
+    # Load translation
+    translation_text = None
     translation_data_path = os.path.join(manifest_path, f"{tablet_id}-translation.txt")
     if os.path.exists(translation_data_path):
+        if verbose:
+            print(f"- Load translation ({translation_data_path}) ...")
         translation_text = open(translation_data_path, 'r', encoding='utf-8').read()
+        data_files.append({
+            "file": f"{tablet_id}-translation.txt",
+            "label": "Translation",
+            "type": "text/plain",
+        })
     else:
         print(f"- No translation found at {translation_data_path}")
 
     # load sign annotations
-    print("- Load sign annotations ...")
     annotations_source_path = os.path.join(manifest_path, f"{tablet_id}-annotator-annotations.json")
     sign_data_list = []
     if os.path.exists(annotations_source_path):
+        if verbose:
+            print(f"- Load sign annotations ({annotations_source_path}) ...")
         sign_data_list = cuneur.parse_cuneur_annotations(annotations_source_path)
     else:
         print(f"- No sign annotations found at {annotations_source_path}")
 
     # add missing atf word index to sign annotations
-    print("- Add missing word indexes to sign annotations ...")
-    if transliteration_text:           
+    if transliteration_text:
+        if verbose:
+            print("- Add missing word indexes to sign annotations ...")
         try:
-            atf_reader.set_text(transliteration_text)
+            cleaned_atf = transliteration_text
+            # remove lines starting with dollar sign
+            cleaned_atf = '\n'.join([line for line in cleaned_atf.splitlines() if not line.startswith('$')])
+           
+
+            atf_reader.set_text(cleaned_atf, 'cdli')
 
             for annotation in sign_data_list:
                 if 'word_index' not in annotation:
@@ -133,10 +164,12 @@ for manifest_path in manifests:
                     if char_info:
                         annotation['word_index'] = char_info['word_index']
                     else:
-                        print(f"Warning: no char info for {annotation['side']} {annotation['line_index']} {annotation['char_index']}")
+                        if verbose:
+                            print(f"Warning: no char info for {annotation['side']} {annotation['line_index']} {annotation['char_index']}")
 
-        except Exception:
-            print(f"- Could not parse {transliteration_path}")
+        except Exception as e:
+            print(f"- Could not parse ATF file {transliteration_path}")
+            print(e)
             continue
 
     # create resource images
@@ -146,7 +179,8 @@ for manifest_path in manifests:
     manifest_id = _config["manifest_id_prefix"] + iiif_uri.id_from_path(manifest_path + '/')
     manifest_uri = iiif_uri.create_manifest_uri(manifest_id)
     manifest_label = os.path.basename(manifest_path)
-    print(f"Creating manifest: {manifest_id}")
+    if verbose:
+        print(f"Creating manifest: {manifest_id}")
    
     manifest = Manifest(
         id=manifest_uri, # type: ignore
@@ -176,7 +210,7 @@ for manifest_path in manifests:
     # add single canvas with choice
     # use manifest label as canvas label
     canvas_id = '0001'
-    canvas = create_canvas_with_choice(canvas_id, str(manifest.label), manifest_id, image_resource_items, iiif_uri)   
+    canvas = create_canvas_with_choice(canvas_id, manifest_label, manifest_id, image_resource_items, iiif_uri)   
     canvases.append(canvas)
     canvas_uri = canvas.id
     
@@ -283,33 +317,11 @@ for manifest_path in manifests:
         # add annotation page reference to canvas
         anno_page_ref = AnnotationPageRefExtended(id=anno_page.id, type="AnnotationPage") # type: ignore
         canvas.annotations.append(anno_page_ref)
-
-    # add word annotations?
-
-    # add line annotations            
-
+        
     # add canvases to manifest
     manifest.items = canvases
 
-    # add seeAlso
-    data_files = [
-        {
-            "file": f"{tablet_id}-transliteration-atf.txt",
-            "label": "Transliteration (ATF)",
-            "type": "text/x-atf",
-        },
-        {
-            "file": f"{tablet_id}-translation.txt",
-            "label": "Translation",
-            "type": "text/plain",
-        },
-        {
-            "file": f"{tablet_id}-data.json",
-            "label": "Metadata",
-            "type": "application/json",
-        },
-    ]
-
+    # add data_files to seeAlso
     see_also = []
     for data_file in data_files:
         data_file_uri = iiif_uri.create_manifest_data_uri(manifest_id, data_file['file'])
