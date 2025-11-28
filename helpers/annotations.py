@@ -61,4 +61,4 @@ def create_sign_annotation(sign: SignData, annotation_uri: str, target_uri: str)
             }
         ]
     )
-    return annotation    
+    return annotation
