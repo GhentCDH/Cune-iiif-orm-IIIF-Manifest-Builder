@@ -41,11 +41,13 @@ def parse_cuneur_annotations(filename: str) -> SignAnnotationList:
             # skip invalid annotations
             required_keys = ['id', 'transliteration', 'line_index', 'char_index', 'side', 'points']
             if not all([key in sign_data.keys() for key in required_keys]):
-                print(f"Invalid annotation: {sign_data}")
+                missing_keys = [key for key in required_keys if key not in sign_data.keys()]
+                sign_data.pop('points', None)
+                print(f"Invalid annotation, missing keys: {missing_keys} ({sign_data})")
                 continue
 
-            # correct annotation info           
-            sign_data['side'] = sign_data['side'].replace('front','obverse').replace('back','reverse')
+            # correct annotation info
+            sign_data['side'] = sign_data.get('side','').replace('front','obverse').replace('back','reverse')
 
             # add annotation to list
             signs.append(SignData(**sign_data))
