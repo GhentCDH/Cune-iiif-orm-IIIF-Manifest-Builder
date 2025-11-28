@@ -73,11 +73,20 @@ def nodegoat_to_iiif_metadata(data: Dict) -> List[Dict[str, Any]]:
 
     # External ID
     if data.get('external_id'):
-        values = [
-            f'<a target="_blank" href="{item["uri"]}">{item["collection"]["label"]}: {item["id"]}</a>'
-            if item.get('uri') else f'{item["collection"]["label"]}: {item["id"]}'
-            for item in data['external_id']
-        ]
+        values = []
+        for item in data['external_id']:
+            if 'id' not in item:
+                continue
+            value = item['id']
+            if 'uri' in item:
+                value = f'<a target="_blank" href="{item["uri"]}">{value}</a>'
+            if 'collection' in item:
+                collection_value = item['collection']['label']
+                if 'uri' in item['collection']:
+                    collection_value = f'<a target="_blank" href="{item["collection"]["uri"]}">{collection_value}</a>'
+                value = f'{value} ({collection_value})'
+            value = f'<span>{value}</span>'
+            values.append(value)
         metadata.append({
             'label': {'en': ['External ID']},
             'value': {'en': values}
@@ -85,12 +94,21 @@ def nodegoat_to_iiif_metadata(data: Dict) -> List[Dict[str, Any]]:
 
     # Collection
     if data.get('collection'):
-        values = [
-            f'<a target="_blank" href="{item["collection"]["uri"]}">{item["collection"]["label"]} : {item["number"]}</a>'
-            if item.get('collection', {}).get('uri')
-            else f'{item["collection"]["label"]}: {item["number"]}'
-            for item in data['collection']
-        ]
+        values = []
+        for item in data.get('collection', []):
+            if 'collection' not in item:
+                continue
+            if 'uri' in item['collection']:
+                value = item['collection']['label']
+                value = f'<a target="_blank" href="{item["collection"]["uri"]}">{value}</a>'
+                if 'number' in item:
+                    value += f': {item["number"]}'
+                value = "<span>" + value + "</span>"
+            else:
+                value = item['collection']['label']
+                if 'number' in item:
+                    value += f': {item["number"]}'    
+            values.append(value)
         metadata.append({
             'label': {'en': ['Collection']},
             'value': {'en': values}
@@ -98,7 +116,7 @@ def nodegoat_to_iiif_metadata(data: Dict) -> List[Dict[str, Any]]:
 
     # Publications
     if data.get('publications'):
-        values = [item['reference'] for item in data['publications']]
+        values = [item['reference'] for item in data['publications'] if 'reference' in item]
         metadata.append({
             'label': {'en': ['Publications']},
             'value': {'en': values}
