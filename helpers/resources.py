@@ -9,22 +9,22 @@ class ImageDetails(TypedDict):
     height: int
 
 
-# find manifest folders
-def scan_manifests(base_path: str) -> list:   
-    dirs = [os.path.join(base_path, filename) for filename in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, filename)) and os.path.exists(os.path.join(base_path, filename, f"{filename}-annotator-annotations.json"))]
+# get subfolders
+def get_subfolders(path: str) -> list:   
+    dirs = [os.path.join(path, filename) for filename in os.listdir(path) if os.path.isdir(os.path.join(path, filename)) and os.path.exists(os.path.join(path, filename, f"{filename}-annotator-annotations.json"))]
     return dirs
 
-# find images in manifest
-def scan_images(manifest_path: str) -> list[ImageDetails]:
+# find images in folder
+def get_folder_images(path: str) -> list[ImageDetails]:
     images: list = []
     
-    dirlist = os.listdir(manifest_path)
+    dirlist = os.listdir(path)
     dirlist.sort()
     
-    image_filenames = [filename for filename in dirlist if os.path.isfile(os.path.join(manifest_path, filename)) and (filename.endswith('.jp2') or filename.endswith('.ptif'))]
+    image_filenames = [filename for filename in dirlist if os.path.isfile(os.path.join(path, filename)) and (filename.endswith('.jp2') or filename.endswith('.ptif'))]
     for filename in image_filenames:
         # Get the full file path
-        file_path = os.path.join(manifest_path, filename)
+        file_path = os.path.join(path, filename)
 
         # option 1: get with and height from image api
         # image_api_uri = uri_helper.create_image_service_uri(image_id)
