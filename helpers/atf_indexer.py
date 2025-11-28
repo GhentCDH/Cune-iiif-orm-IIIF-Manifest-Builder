@@ -14,6 +14,8 @@ from pyoracc.model.translation import Translation
    
 class AtfChar(TypedDict):
     text: str
+    surface: str
+    line_index: int
     word_index: int
     char_index: int
 
@@ -98,7 +100,7 @@ class AtfIndexer():
                     for char in chars:
                         line_char_index += 1
                         char_index_key = (object.objecttype, str(line.label), int(line_char_index))
-                        char_info = { "text": char, "word_index": line_word_index, "char_index": line_char_index }
+                        char_info = { "text": char, "surface": object.objecttype, "line_index": line.label, "word_index": line_word_index, "char_index": line_char_index,  }
                         self.char_index[char_index_key] = AtfChar(**char_info)
             elif isinstance(line, Ruling):
                 pass
