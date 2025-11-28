@@ -11,5 +11,6 @@ _config = {
     },
     "image_id_prefix": "cune-iiif-orm:testset:",
     "manifest_id_prefix": "cune-iiif-orm:sde:",
-    "collection_id": "cune-iiif-orm:sde"
+    "collection_id": "cune-iiif-orm:sde",
+    "verbose": False
 }
