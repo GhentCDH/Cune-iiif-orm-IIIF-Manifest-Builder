@@ -62,3 +62,20 @@ def create_sign_annotation(sign: SignData, annotation_uri: str, target_uri: str)
         ]
     )
     return annotation
+
+def create_layer_preset_annotation(label: str, states: list, annotation_uri: str, target_id: str):
+
+    annotation = Annotation(
+        id=annotation_uri,  # type: ignore
+        body=[
+            {
+                "type": "LayerPreset",
+                "format": "application/json",
+                "label": {"en": [label]},
+                "value": states
+            }
+        ],
+        motivation="supplementing",
+        target=[target_id]  # type: ignore
+    )
+    return annotation

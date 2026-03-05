@@ -12,6 +12,8 @@ class ImageDetails(TypedDict):
 # get subfolders
 def get_subfolders(path: str) -> list:   
     dirs = [os.path.join(path, filename) for filename in os.listdir(path) if os.path.isdir(os.path.join(path, filename)) and os.path.exists(os.path.join(path, filename, f"{filename}-annotator-annotations.json"))]
+    # sort dirs
+    dirs.sort()
     return dirs
 
 # find images in folder

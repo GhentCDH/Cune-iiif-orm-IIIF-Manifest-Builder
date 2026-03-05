@@ -218,6 +218,85 @@ for manifest_path in manifests:
     if canvas.annotations is None:
         canvas.annotations = []
 
+    # app layer presets
+    image_resource_item_ids = [str(image_resource_item.id) for image_resource_item in image_resource_items]
+    preset_annotations = []
+
+    ## create color preset layer
+    if resource_ids := list(filter(lambda id: "_ColorA" in id, image_resource_item_ids)):
+        resource_id = resource_ids[0]
+
+        annotation_uri = iiif_uri.create_manifest_annotation_uri(manifest_id, f"{tablet_id}-layer-preset1.json")
+        annotation_path = iiif_uri.create_manifest_annotation_path(tablet_id, f"{tablet_id}-layer-preset1.json")
+
+        states = [
+            {
+                "id": resource_id,
+                "opacity": 1
+            }
+        ]
+
+        annotation = annotations.create_layer_preset_annotation("Color", states, annotation_uri, str(canvas.id))
+        annotations.save_iiif_model(annotation, annotation_path) # type: ignore
+
+        preset_annotations.append(annotation)
+
+    ## create sketch preset layer
+    if resource_ids := list(filter(lambda id: "_Sketch01Hard" in id, image_resource_item_ids)):
+
+        resource_id = resource_ids[0]
+
+        annotation_uri = iiif_uri.create_manifest_annotation_uri(manifest_id, f"{tablet_id}-layer-preset2.json")
+        annotation_path = iiif_uri.create_manifest_annotation_path(tablet_id, f"{tablet_id}-layer-preset2.json")
+
+        states = [
+            {
+                "id": resource_id,
+                "opacity": 1
+            }
+        ]
+
+        annotation = annotations.create_layer_preset_annotation("Sketch", states, annotation_uri, str(canvas.id))
+        annotations.save_iiif_model(annotation, annotation_path) # type: ignore
+
+        preset_annotations.append(annotation)
+
+    ## create combined preset layer
+    if len(preset_annotations) == 2:
+
+        resource_id_1 = list(filter(lambda id: "_ColorA" in id, image_resource_item_ids))[0]
+        resource_id_2 = list(filter(lambda id: "_Sketch01Hard" in id, image_resource_item_ids))[0]
+
+        annotation_uri = iiif_uri.create_manifest_annotation_uri(manifest_id, f"{tablet_id}-layer-preset3.json")
+        annotation_path = iiif_uri.create_manifest_annotation_path(tablet_id, f"{tablet_id}-layer-preset3.json")
+
+        states = [
+            {
+                "id": resource_id_1,
+                "opacity": 1
+            },
+            {
+                "id": resource_id_2,
+                "opacity": 0.2
+            }
+        ]
+
+        annotation = annotations.create_layer_preset_annotation("Combined", states, annotation_uri, str(canvas.id))
+        annotations.save_iiif_model(annotation, annotation_path) # type: ignore
+
+        preset_annotations.append(annotation)
+
+    if len(preset_annotations):
+        anno_page_uri = iiif_uri.create_manifest_annotation_page_uri(manifest_id, f"{tablet_id}-layer-presets.json")
+        anno_page_path = iiif_uri.create_manifest_annotation_page_path(tablet_id, f"{tablet_id}-layer-presets.json")
+
+        anno_page = annotations.create_annotation_page(anno_page_uri, "Layer presets", preset_annotations)
+        annotations.save_iiif_model(anno_page, anno_page_path) # type: ignore
+
+        # add annotation page reference to canvas
+        anno_page_ref = AnnotationPageRefExtended(id=anno_page.id, type="AnnotationPage") # type: ignore
+        canvas.annotations.append(anno_page_ref)
+
     # add translation
     if translation_text:
 
