@@ -6,9 +6,17 @@ from iiif_prezi3 import AnnotationPage, Annotation, Base
 
 
 
-def save_iiif_model(model: Base, dest_path: str):
+def save_iiif_model(model: Base, dest_path: str, context: list[str]|str = []):
+    json_ld = model.jsonld_dict()
+
+    # patch @context?
+    new_context = context if type(context) is list else [ context ]
+    if len(new_context):
+        new_context.append(str(json_ld.get('@context')))
+        json_ld['@context'] = new_context
+
     with open(dest_path, 'w') as dest_file:
-        json.dump(model.jsonld_dict(), dest_file, indent=4)
+        json.dump(json_ld, dest_file, indent=4)
 
 
 def create_annotation_page(id: str, label: str, items: list[Annotation]) -> AnnotationPage:
@@ -62,6 +70,43 @@ def create_sign_annotation(sign: SignData, annotation_uri: str, target_uri: str)
         ]
     )
     return annotation
+
+def create_translation_annotation(translation: str, annotation_uri: str, target_uri: str) -> Annotation:
+
+    annotation = Annotation(
+        id = annotation_uri, # type: ignore
+        motivation = "describing",
+        body=[
+            {
+                "type": "TextualBody",
+                "value": translation,
+                "format": "text/plain",
+                "purpose": "translating",
+                "language": "en",
+            }
+        ],
+        target=[ target_uri ] # type: ignore
+    )
+    return annotation
+
+def create_transliteration_annotation(transliteration: str, annotation_uri: str, target_uri: str) -> Annotation:
+
+    annotation = Annotation(
+        id = annotation_uri, # type: ignore
+        motivation = "describing",
+        body=[
+            {
+                "type": "TextualBody",
+                "value": transliteration,
+                "format": "text/x-atf",
+                "purpose": "transliterating",
+            }
+        ],
+        target=[ target_uri ] # type: ignore
+    )
+    return annotation
+
+
 
 def create_layer_preset_annotation(label: str, states: list, annotation_uri: str, target_id: str):
 
