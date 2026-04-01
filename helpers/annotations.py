@@ -9,7 +9,7 @@ from iiif_prezi3 import AnnotationPage, Annotation, Base
 def save_iiif_model(model: Base, dest_path: str, context: list[str]|str = []):
     json_ld = model.jsonld_dict()
 
-    # patch @context?    
+    # patch @context?
     new_context = context if type(context) is list else [ context ]
     if len(new_context):
         new_context.append(str(json_ld.get('@context')))
