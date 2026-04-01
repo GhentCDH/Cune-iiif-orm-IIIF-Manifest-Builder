@@ -6,9 +6,17 @@ from iiif_prezi3 import AnnotationPage, Annotation, Base
 
 
 
-def save_iiif_model(model: Base, dest_path: str):
+def save_iiif_model(model: Base, dest_path: str, context: list[str]|str = []):
+    json_ld = model.jsonld_dict()
+
+    # patch @context?    
+    new_context = context if type(context) is list else [ context ]
+    if len(new_context):
+        new_context.append(str(json_ld.get('@context')))
+        json_ld['@context'] = new_context
+
     with open(dest_path, 'w') as dest_file:
-        json.dump(model.jsonld_dict(), dest_file, indent=4)
+        json.dump(json_ld, dest_file, indent=4)
 
 
 def create_annotation_page(id: str, label: str, items: list[Annotation]) -> AnnotationPage:

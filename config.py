@@ -1,6 +1,7 @@
 import os
 
 _config = {
+    "namespace": "https://w3id.org/cune-iiif-orm/ontology.jsonld",
     "base_url": "https://iiif.ghentcdh.ugent.be/iiif",
     "base_path": os.path.abspath('/workspaces/data'),
     "image_api": {
