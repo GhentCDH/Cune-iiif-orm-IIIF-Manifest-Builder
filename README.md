@@ -47,7 +47,7 @@ Below is an example of how a Choice of 2 images is implemented in the Cune-iiif-
 ```json
 {
     "@context": "http://iiif.io/api/presentation/3/context.json",
-    "id": "https://iiif.ghentcdh.ugent.be/iiif/manifests/cune-iiif-orm:sde:O.0222",
+    "id": "https://example.com/iiif/manifests/cune-iiif-orm:sde:O.0222",
     "type": "Manifest",
     "label": {
         "en": [
@@ -56,7 +56,7 @@ Below is an example of how a Choice of 2 images is implemented in the Cune-iiif-
     },
     "items": [
         {
-            "id": "https://iiif.ghentcdh.ugent.be/iiif/manifests/cune-iiif-orm:sde:O.0222/canvas/0001",
+            "id": "https://example.com/iiif/manifests/cune-iiif-orm:sde:O.0222/canvas/0001",
             "type": "Canvas",
             "label": {
                 "en": [
@@ -67,24 +67,24 @@ Below is an example of how a Choice of 2 images is implemented in the Cune-iiif-
             "width": 2945,
             "items": [
                 {
-                    "id": "https://iiif.ghentcdh.ugent.be/iiif/manifests/cune-iiif-orm:sde:O.0222/canvas/0001/annotation-page/layers",
+                    "id": "https://example.com/iiif/manifests/cune-iiif-orm:sde:O.0222/canvas/0001/annotation-page/layers",
                     "type": "AnnotationPage",
                     "items": [
                         {
-                            "id": "https://iiif.ghentcdh.ugent.be/iiif/manifests/cune-iiif-orm:sde:O.0222/canvas/0001/annotation/layers",
+                            "id": "https://example.com/iiif/manifests/cune-iiif-orm:sde:O.0222/canvas/0001/annotation/layers",
                             "type": "Annotation",
                             "motivation": "painting",
                             "body": {
                                 "type": "Choice",
                                 "items": [
                                     {
-                                        "id": "https://iiif.ghentcdh.ugent.be/iiif/images/cune-iiif-orm:testset:O.0222:O.0222_ColorA/full/full/0/default.jpg",
+                                        "id": "https://example.com/iiif/images/cune-iiif-orm:testset:O.0222:O.0222_ColorA/full/full/0/default.jpg",
                                         "type": "Image",
                                         "height": 6670,
                                         "width": 2945,
                                         "service": [
                                             {
-                                                "id": "https://iiif.ghentcdh.ugent.be/iiif/images/cune-iiif-orm:testset:O.0222:O.0222_ColorA",
+                                                "id": "https://example.com/iiif/images/cune-iiif-orm:testset:O.0222:O.0222_ColorA",
                                                 "type": "ImageService2",
                                                 "profile": "level2"
                                             }
@@ -97,13 +97,13 @@ Below is an example of how a Choice of 2 images is implemented in the Cune-iiif-
                                         }
                                     },
                                     {
-                                        "id": "https://iiif.ghentcdh.ugent.be/iiif/images/cune-iiif-orm:testset:O.0222:O.0222_ColorB/full/full/0/default.jpg",
+                                        "id": "https://example.com/iiif/images/cune-iiif-orm:testset:O.0222:O.0222_ColorB/full/full/0/default.jpg",
                                         "type": "Image",
                                         "height": 6670,
                                         "width": 2945,
                                         "service": [
                                             {
-                                                "id": "https://iiif.ghentcdh.ugent.be/iiif/images/cune-iiif-orm:testset:O.0222:O.0222_ColorB",
+                                                "id": "https://example.com/iiif/images/cune-iiif-orm:testset:O.0222:O.0222_ColorB",
                                                 "type": "ImageService2",
                                                 "profile": "level2"
                                             }
@@ -117,7 +117,7 @@ Below is an example of how a Choice of 2 images is implemented in the Cune-iiif-
                                     }
                                 ]
                             },
-                            "target": "https://iiif.ghentcdh.ugent.be/iiif/manifests/cune-iiif-orm:sde:O.0222/canvas/0001"
+                            "target": "https://example.com/iiif/manifests/cune-iiif-orm:sde:O.0222/canvas/0001"
                         }
                     ]
                 }
@@ -133,28 +133,31 @@ Layer presets are modelled as W3C Web Annotations. Each annotation has the follo
 
 ```
 {
+  "@context": [
+    "https://w3id.org/cune-iiif-orm/ontology.jsonld",
+    "http://iiif.io/api/presentation/3/context.json"
+  ],
   "id": "https://example.org/anno/preset1",
   "type": "Annotation",
   "motivation": "supplementing",
   "body": {
     "type": "LayerPreset",
-    "format": "application/json",
     "label": { "en": ["High contrast preset"] },
-    "value": [
+    "preset": [
         {
-            "id": "image_id_1",
+            "id": "https://example.com/iiif/images/cune-iiif-orm:testset:O.0222:O.0222_ColorA/full/full/0/default.jpg",
             "opacity": 1.0
         },
         {
-            "id": "image_id_2",
+            "id": "https://example.com/iiif/images/cune-iiif-orm:testset:O.0222:O.0222_ColorB/full/full/0/default.jpg",
             "opacity": 0.5
         },
         {
-            "id": "image_id_3",
+            "id": "https://example.com/iiif/images/cune-iiif-orm:testset:O.0222:O.0222_ColorD/full/full/0/default.jpg",
             "opacity": 0.1
         }
-    }
-  ],
+    ]
+  },
   "target": "https://example.org/canvas1"
 }
 ```
@@ -174,7 +177,7 @@ This LayerPreset structure is not part of the official IIIF Presentation API spe
 While this approach follows IIIF conventions and best practices, it will only be recognized and interpreted by viewers that have been specifically developed or configured to support this custom annotation type. Standard IIIF viewers will typically ignore annotations with unrecognized body types, ensuring backward compatibility.
 
 
-### Sign Snnotations
+### Sign Annotations
 
 The annotations are modeled as W3C annotations. Each annotation has the following properties: 
 
@@ -182,7 +185,7 @@ The annotations are modeled as W3C annotations. Each annotation has the followin
 * **motivation**: Set to "describing" to indicate the annotation describes the target
 * **body**: Contains two elements:
   * A **TextualBody** with the ATF transliteration of the marked sign
-    * `purpose`: "transliteration" (indicates this is a transliteration)
+    * `purpose`: "transliterating"
     * `value`: The transliterated sign text
     * `format`: "text/plain"
   * A **SignPosition** object (custom type) describing the position of the sign within the text structure:
@@ -199,8 +202,11 @@ The annotations are modeled as W3C annotations. Each annotation has the followin
 
 ```json
 {
-    "@context": "http://iiif.io/api/presentation/3/context.json",
-    "id": "https://iiif.ghentcdh.ugent.be/iiif/manifests/cune-iiif-orm:sde:O.0222/anno-page/O.0222-signs.json",
+    "@context": [
+        "https://w3id.org/cune-iiif-orm/ontology.jsonld",
+        "http://iiif.io/api/presentation/3/context.json"
+    ],  
+    "id": "https://example.com/iiif/manifests/cune-iiif-orm:sde:O.0222/anno-page/O.0222-signs.json",
     "type": "AnnotationPage",
     "label": {
         "en": [
@@ -209,7 +215,7 @@ The annotations are modeled as W3C annotations. Each annotation has the followin
     },
     "items": [
         {
-            "id": "https://iiif.ghentcdh.ugent.be/iiif/manifests/cune-iiif-orm:sde:O.0222/annotation/23b52153-2d3f-460a-8c4e-4950aa3e52f4.json",
+            "id": "https://example.com/iiif/manifests/cune-iiif-orm:sde:O.0222/annotation/23b52153-2d3f-460a-8c4e-4950aa3e52f4.json",
             "type": "Annotation",
             "motivation": "describing",
             "body": [
@@ -230,40 +236,10 @@ The annotations are modeled as W3C annotations. Each annotation has the followin
             "target": [
                 {
                     "type": "SpecificResource",
-                    "source": "https://iiif.ghentcdh.ugent.be/iiif/manifests/cune-iiif-orm:sde:O.0222/canvas/0001",
+                    "source": "https://example.com/iiif/manifests/cune-iiif-orm:sde:O.0222/canvas/0001",
                     "selector": {
                         "type": "SvgSelector",
                         "value": "<svg><path d=\"M1087.50,931.70 873.10,916.65 884.35,1063.27 876.96,1162.99 913.89,1220.01 1037.62,1199.47 1135.50,1114.75 1083.79,1042.73z\" /></svg>"
-                    }
-                }
-            ]
-        },
-        {
-            "id": "https://iiif.ghentcdh.ugent.be/iiif/manifests/cune-iiif-orm:sde:O.0222/annotation/d29f0312-0523-46ff-9638-bdec764fbf94",
-            "type": "Annotation",
-            "motivation": "describing",
-            "body": [
-                {
-                    "type": "TextualBody",
-                    "purpose": "transliterating",
-                    "value": "SAR",
-                    "format": "text/plain"
-                },
-                {
-                    "type": "SignPosition",
-                    "side": "obverse",
-                    "lineIndex": 1,
-                    "wordIndex": 1,
-                    "charIndex": 2
-                }
-            ],
-            "target": [
-                {
-                    "type": "SpecificResource",
-                    "source": "https://iiif.ghentcdh.ugent.be/iiif/manifests/cune-iiif-orm:sde:O.0222/canvas/0001",
-                    "selector": {
-                        "type": "SvgSelector",
-                        "value": "<svg><path d=\"M1409.12,896.48 1385.22,982.57 1413.70,1012.21 1363.84,1106.39 1326.91,1121.16 1284.66,1097.16 1214.73,1087.92 1140.86,1076.84 1155.64,934.65 1205.50,862.85 1297.83,855.69z\" /></svg>"
                     }
                 }
             ]
@@ -277,7 +253,7 @@ The annotations are modeled as W3C annotations. Each annotation has the followin
 The translations are modeled as W3C Web Annotations. 
 
 Each annotation has a body of type **TextualBody** with:
-* `purpose`: "translating" (following W3C Web Annotation standard)
+* `purpose`: "translating"
 * `value`: The English translation text
 * `format`: "text/plain"
 
@@ -288,7 +264,7 @@ The target is the entire canvas (no selector), since translations apply to the w
 ```json
 {
     "@context": "http://iiif.io/api/presentation/3/context.json",
-    "id": "https://iiif.ghentcdh.ugent.be/iiif/manifests/cune-iiif-orm:sde:O.0222/annotation-page/O.0222-translations.json",
+    "id": "https://example.com/iiif/manifests/cune-iiif-orm:sde:O.0222/annotation-page/O.0222-translations.json",
     "type": "AnnotationPage",
     "label": {
         "en": [
@@ -297,7 +273,7 @@ The target is the entire canvas (no selector), since translations apply to the w
     },
     "items": [
         {
-            "id": "https://iiif.ghentcdh.ugent.be/iiif/manifests/cune-iiif-orm:sde:O.0222/annotation/O.0222-translation.json",
+            "id": "https://example.com/iiif/manifests/cune-iiif-orm:sde:O.0222/annotation/O.0222-translation.json",
             "type": "Annotation",
             "motivation": "describing",
             "body": [
@@ -309,7 +285,7 @@ The target is the entire canvas (no selector), since translations apply to the w
                 }
             ],
             "target": [
-                "https://iiif.ghentcdh.ugent.be/iiif/manifests/cune-iiif-orm:sde:O.0222/canvas/0001"
+                "https://example.com/iiif/manifests/cune-iiif-orm:sde:O.0222/canvas/0001"
             ]
         }
     ]
@@ -329,8 +305,11 @@ Each annotation has a body of type **TextualBody** with:
 
 ```json
 {
-    "@context": "http://iiif.io/api/presentation/3/context.json",
-    "id": "https://iiif.ghentcdh.ugent.be/iiif/manifests/cune-iiif-orm:sde:O.0222/annotation-page/O.0222-transliterations.json",
+    "@context": [
+        "https://w3id.org/cune-iiif-orm/ontology.jsonld",
+        "http://iiif.io/api/presentation/3/context.json"
+    ],
+    "id": "https://example.com/iiif/manifests/cune-iiif-orm:sde:O.0222/annotation-page/O.0222-transliterations.json",
     "type": "AnnotationPage",
     "label": {
         "en": [
@@ -339,7 +318,7 @@ Each annotation has a body of type **TextualBody** with:
     },
     "items": [
         {
-            "id": "https://iiif.ghentcdh.ugent.be/iiif/manifests/cune-iiif-orm:sde:O.0222/annotation/O.0222-transliteration.json",
+            "id": "https://example.com/iiif/manifests/cune-iiif-orm:sde:O.0222/annotation/O.0222-transliteration.json",
             "type": "Annotation",
             "motivation": "describing",
             "body": [
@@ -351,7 +330,7 @@ Each annotation has a body of type **TextualBody** with:
                 }
             ],
             "target": [
-                "https://iiif.ghentcdh.ugent.be/iiif/manifests/cune-iiif-orm:sde:O.0222/canvas/0001"
+                "https://example.com/iiif/manifests/cune-iiif-orm:sde:O.0222/canvas/0001"
             ]
         }
     ]
@@ -375,7 +354,7 @@ This allows programmatic access to the tablet's transliteration, translation, an
 ```json
     "seeAlso": [
         {
-            "id": "https://iiif.ghentcdh.ugent.be/iiif/manifests/cune-iiif-orm:sde:O.0222/O.0222-transliteration-atf.txt",
+            "id": "https://example.com/iiif/manifests/cune-iiif-orm:sde:O.0222/O.0222-transliteration-atf.txt",
             "type": "Dataset",
             "label": {
                 "en": [
@@ -386,7 +365,7 @@ This allows programmatic access to the tablet's transliteration, translation, an
             "profile": "https://iiif.io/api/presentation/3/seeAlso.json"
         },
         {
-            "id": "https://iiif.ghentcdh.ugent.be/iiif/manifests/cune-iiif-orm:sde:O.0222/O.0222-translation.txt",
+            "id": "https://example.com/iiif/manifests/cune-iiif-orm:sde:O.0222/O.0222-translation.txt",
             "type": "Dataset",
             "label": {
                 "en": [
@@ -397,7 +376,7 @@ This allows programmatic access to the tablet's transliteration, translation, an
             "profile": "https://iiif.io/api/presentation/3/seeAlso.json"
         },
         {
-            "id": "https://iiif.ghentcdh.ugent.be/iiif/manifests/cune-iiif-orm:sde:O.0222/O.0222-data.json",
+            "id": "https://example.com/iiif/manifests/cune-iiif-orm:sde:O.0222/O.0222-data.json",
             "type": "Dataset",
             "label": {
                 "en": [
