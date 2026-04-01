@@ -4,7 +4,7 @@ import os
 import json
 import shutil
 
-from iiif_prezi3 import Manifest, AnnotationPageRefExtended, AnnotationBody, config, Canvas, LinkedResource, Collection, Annotation, ManifestRef
+from iiif_prezi3 import Manifest, AnnotationPageRefExtended, AnnotationBody, config as prezi3_config, Canvas, LinkedResource, Collection, Annotation, ManifestRef
 
 import helpers.annotations as annotations
 import helpers.cuneur as cuneur
@@ -17,7 +17,7 @@ from helpers.nodegoat import nodegoat_to_iiif_metadata
 from helpers.resources import get_folder_images, get_subfolders
 from config import _config
 
-config.configs['helpers.auto_fields.AutoLang'].auto_lang = "en"
+prezi3_config.configs['helpers.auto_fields.AutoLang'].auto_lang = "en"
 
 verbose = _config.get('verbose', False)
 
@@ -254,7 +254,7 @@ for manifest_path in manifests:
         anno_page_path = iiif_uri.create_manifest_annotation_page_path(tablet_id, f"{tablet_id}-transliterations.json")        
 
         anno_page = annotations.create_annotation_page(anno_page_uri, "Transliterations", [annotation])
-        annotations.save_iiif_model(anno_page, anno_page_path) # type: ignore
+        annotations.save_iiif_model(anno_page, anno_page_path, _config.get("namespace")) # type: ignore
 
         # add annotation page to canvas
         anno_page_ref = AnnotationPageRefExtended(id=anno_page.id, type="AnnotationPage") # type: ignore
@@ -277,7 +277,7 @@ for manifest_path in manifests:
             annotation_path = iiif_uri.create_manifest_annotation_path(tablet_id, f"{sign['id']}.json")
 
             annotation = annotations.create_sign_annotation(sign, annotation_uri, str(canvas.id))
-            annotations.save_iiif_model(annotation, annotation_path) # type: ignore
+            annotations.save_iiif_model(anno_page, anno_page_path, _config.get("namespace")) # type: ignore
 
             items.append(annotation)
 
@@ -286,7 +286,7 @@ for manifest_path in manifests:
         anno_page_path = iiif_uri.create_manifest_annotation_page_path(tablet_id, f"{tablet_id}-signs.json")
 
         anno_page = annotations.create_annotation_page(anno_page_uri, "Sign Annotations", items)
-        annotations.save_iiif_model(anno_page, anno_page_path) # type: ignore
+        annotations.save_iiif_model(anno_page, anno_page_path, _config.get("namespace")) # type: ignore
 
         # add annotation page reference to canvas
         anno_page_ref = AnnotationPageRefExtended(id=anno_page.id, type="AnnotationPage") # type: ignore
@@ -322,9 +322,6 @@ for manifest_path in manifests:
     manifest_ref = ManifestRef(
         id=str(manifest.id), # type: ignore
         label=manifest.label,
-        # **{
-        #     "@context": None
-        # }
     )
     manifest_ref.thumbnail = manifest.thumbnail # type: ignore
     if collection_manifest.items is None:
