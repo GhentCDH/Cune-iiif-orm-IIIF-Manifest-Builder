@@ -356,7 +356,7 @@ for manifest_path in manifests:
             annotation_path = iiif_uri.create_manifest_annotation_path(tablet_id, f"{sign['id']}.json")
 
             annotation = annotations.create_sign_annotation(sign, annotation_uri, str(canvas.id))
-            annotations.save_iiif_model(anno_page, anno_page_path, _config.get("namespace")) # type: ignore
+            annotations.save_iiif_model(annotation, annotation_path, _config.get("namespace")) # type: ignore
 
             items.append(annotation)
 
