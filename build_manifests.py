@@ -237,7 +237,7 @@ for manifest_path in manifests:
         ]
 
         annotation = annotations.create_layer_preset_annotation("Color", states, annotation_uri, str(canvas.id))
-        annotations.save_iiif_model(annotation, annotation_path) # type: ignore
+        annotations.save_iiif_model(annotation, annotation_path, _config.get("namespace")) # type: ignore
 
         preset_annotations.append(annotation)
 
@@ -257,7 +257,7 @@ for manifest_path in manifests:
         ]
 
         annotation = annotations.create_layer_preset_annotation("Sketch", states, annotation_uri, str(canvas.id))
-        annotations.save_iiif_model(annotation, annotation_path) # type: ignore
+        annotations.save_iiif_model(annotation, annotation_path, _config.get("namespace")) # type: ignore
 
         preset_annotations.append(annotation)
 
@@ -282,7 +282,7 @@ for manifest_path in manifests:
         ]
 
         annotation = annotations.create_layer_preset_annotation("Combined", states, annotation_uri, str(canvas.id))
-        annotations.save_iiif_model(annotation, annotation_path) # type: ignore
+        annotations.save_iiif_model(annotation, annotation_path, _config.get("namespace")) # type: ignore
 
         preset_annotations.append(annotation)
 
@@ -291,7 +291,7 @@ for manifest_path in manifests:
         anno_page_path = iiif_uri.create_manifest_annotation_page_path(tablet_id, f"{tablet_id}-layer-presets.json")
 
         anno_page = annotations.create_annotation_page(anno_page_uri, "Layer presets", preset_annotations)
-        annotations.save_iiif_model(anno_page, anno_page_path) # type: ignore
+        annotations.save_iiif_model(anno_page, anno_page_path, _config.get("namespace")) # type: ignore
 
         # add annotation page reference to canvas
         anno_page_ref = AnnotationPageRefExtended(id=anno_page.id, type="AnnotationPage") # type: ignore
