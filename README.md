@@ -131,7 +131,7 @@ Below is an example of how a Choice of 2 images is implemented in the Cune-iiif-
 
 Layer presets are modelled as W3C Web Annotations. Each annotation has the following properties:
 
-```
+```json
 {
   "@context": [
     "https://w3id.org/cune-iiif-orm/ontology.jsonld",
