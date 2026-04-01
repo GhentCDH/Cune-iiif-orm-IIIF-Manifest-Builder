@@ -115,9 +115,8 @@ def create_layer_preset_annotation(label: str, states: list, annotation_uri: str
         body=[
             {
                 "type": "LayerPreset",
-                "format": "application/json",
                 "label": {"en": [label]},
-                "value": states
+                "preset": states
             }
         ],
         motivation="supplementing",
