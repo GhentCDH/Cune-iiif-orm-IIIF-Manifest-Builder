@@ -62,3 +62,40 @@ def create_sign_annotation(sign: SignData, annotation_uri: str, target_uri: str)
         ]
     )
     return annotation
+
+def create_translation_annotation(translation: str, annotation_uri: str, target_uri: str) -> Annotation:
+
+    annotation = Annotation(
+        id = annotation_uri, # type: ignore
+        motivation = "describing",
+        body=[
+            {
+                "type": "TextualBody",
+                "value": translation,
+                "format": "text/plain",
+                "purpose": "translating",
+                "language": "en",
+            }
+        ],
+        target=[ target_uri ] # type: ignore
+    )
+    return annotation
+
+def create_transliteration_annotation(transliteration: str, annotation_uri: str, target_uri: str) -> Annotation:
+
+    annotation = Annotation(
+        id = annotation_uri, # type: ignore
+        motivation = "describing",
+        body=[
+            {
+                "type": "TextualBody",
+                "value": transliteration,
+                "format": "text/x-atf",
+                "purpose": "transliterating",
+            }
+        ],
+        target=[ target_uri ] # type: ignore
+    )
+    return annotation
+
+

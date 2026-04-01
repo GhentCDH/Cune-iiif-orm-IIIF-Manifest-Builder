@@ -225,21 +225,7 @@ for manifest_path in manifests:
         annotation_uri = iiif_uri.create_manifest_annotation_uri(manifest_id, f"{tablet_id}-translation.json")
         annotation_path = iiif_uri.create_manifest_annotation_path(tablet_id, f"{tablet_id}-translation.json")
 
-        annotation = Annotation(
-            id=annotation_uri, # type: ignore
-            body=[
-                {
-                    "type": "TextualBody",
-                    "value": translation_text,
-                    "format": "text/plain",
-                    "purpose": "translating",
-                    "language": "en",
-                }
-            ],
-            motivation="describing",
-            target=[ str(canvas.id) ] # type: ignore
-        )
-
+        annotation = annotations.create_translation_annotation(translation_text, annotation_uri, str(canvas.id))
         annotations.save_iiif_model(annotation, annotation_path) # type: ignore
 
         # create translation annotation page
@@ -260,20 +246,8 @@ for manifest_path in manifests:
         annotation_uri = iiif_uri.create_manifest_annotation_uri(manifest_id, f"{tablet_id}-transliteration.json")
         annotation_path = iiif_uri.create_manifest_annotation_path(tablet_id, f"{tablet_id}-transliteration.json")
 
-        annotation = Annotation(
-            id=annotation_uri, # type: ignore
-            body=[
-                {
-                    "type": "TextualBody",
-                    "value": transliteration_text,
-                    "format": "text/x-atf",
-                    "purpose": "transliterating",
-                }
-            ],
-            motivation="describing",
-            target=[ str(canvas.id) ] # type: ignore
-        )
-        annotations.save_iiif_model(annotation, annotation_path) # type: ignore
+        annotation = annotations.create_transliteration_annotation(transliteration_text, annotation_uri, str(canvas.id))
+        annotations.save_iiif_model(annotation, annotation_path, _config.get("namespace")) # type: ignore
 
         # create annotation page
         anno_page_uri = iiif_uri.create_manifest_annotation_page_uri(manifest_id, f"{tablet_id}-transliterations.json")
